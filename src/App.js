@@ -1,47 +1,53 @@
-import React, {useRef, useState} from 'react'
-import Counter from "./components/Counter";
-import ClassCounter from "./components/ClassCounter";
+import React, {useMemo, useRef, useState} from 'react'
+import Counter from "./components/ui/Counter";
+import ClassCounter from "./components/ui/ClassCounter";
 import './styles/App.css'
-import PostItem from "./components/PostItem";
-import PostList from "./components/PostList";
+import PostItem from "./components/ui/PostItem";
+import PostList from "./components/ui/PostList";
 import MyButton from "./components/ui/button/MyButton";
 import MyInput from "./components/ui/input/MyInput";
+import PostForm from "./components/ui/PostForm";
+import MySelect from "./components/ui/select/MySelect";
+import PostFilter from "./components/ui/PostFilter";
+import MyModal from "./components/ui/my-modal/MyModal";
+import {usePosts} from "./hooks/usePosts";
 
 function App() {
   const [posts, setPosts] = useState([
-    {id: 1, title: 'Javascript', body: 'Description'},
-    {id: 2, title: 'Javascript 2', body: 'Description'},
-    {id: 3, title: 'Javascript 3', body: 'Description'},
-    {id: 4, title: 'Javascript 4', body: 'Description'}
+    {id: 1, title: 'AA', body: 'cc'},
+    {id: 2, title: 'CC', body: 'aa'},
+    {id: 3, title: 'BB', body: 'nnnn'},
+    {id: 4, title: 'QQ', body: 'bb'}
   ])
 
-  const [post, setPost] = useState({title: '', body: ''})
-  const [body, setBody] = useState('')
+  const [filter, setFilter] = useState({sort: '', query: ''})
+  const [modal, setModal] = useState(false)
+  const sortedAndSearchedPosts = usePosts(posts, filter.sort, filter.query)
 
-  const addNewPost = (e) => {
-    e.preventDefault()
-    setPosts([...posts, {...post, id: Date.now()}])
-    setPost({title: '', body: ''})
+  const createPost = (newPost) => {
+    setPosts([...posts, newPost])
+    setModal(false)
   }
-  
+
+  const removePost = (post) => {
+    setPosts(posts.filter(p => p.id !== post.id))
+  }
+
   return (
     <div className="App">
-      <form>
-        <MyInput
-          value={post.title}
-          onChange={e => setPost({...post, title: e.target.value})}
-          type="text"
-          placeholder="Post Name"
-        />
-        <MyInput
-          value={post.body}
-          onChange={e => setPost({...post, body: e.target.value})}
-          type="text"
-          placeholder="Post Description"
-        />
-        <MyButton onClick={addNewPost}>Create Post</MyButton>
-      </form>
-      <PostList posts={posts} title='Post List About JavaScript'/>
+      <MyButton style={{marginTop: '30px'}} onClick={() => setModal(true)}>
+        Create User
+      </MyButton>
+      <MyModal visible={modal} setVisible={setModal}>
+        <PostForm create={createPost}/>
+      </MyModal>
+      <hr style={{margin: '15px 0'}}/>
+      <PostFilter
+        filter={filter}
+        setFilter={setFilter}
+      />
+
+      <PostList remove={removePost} posts={sortedAndSearchedPosts} title='Post List About JavaScript'/>
 
     </div>
   );
